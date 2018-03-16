@@ -1,0 +1,11 @@
+Agda-based solution to the POPLMark2 reloaded challenge.
+
+To compile this solution you'll need:
+
+* Agda version 2.5.3
+* Agda's standard library version 0.15
+
+To check this solution you can:
+
+* `make` to build the project
+* `make html` to produce html documentation
