@@ -1,0 +1,10 @@
+-R . Rec
+base.v
+contexts.v
+reduction.v
+stlc.v
+sn_defs.v
+sn_inductive_2a.v
+sn_inductive_2b.v
+sn_inductive_soundness_1a.v
+sn_inductive_soundness_1b.v
