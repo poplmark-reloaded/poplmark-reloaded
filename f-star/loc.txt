@@ -1,0 +1,14 @@
+Sturm, Sebastian. (2018). Verification and theorem proving in
+F*. M.Phil. thesis, LMU.
+
+https://github.com/sturmsebastian/Fstar-master-thesis-code
+
+LOCs:
+Prelude.fst	194
+Base.fst	1073
+PropSN.fst	247
+PropSN2.fst	119	
+Sound.fst	99
+StrongNorm.fst	151
+
+
