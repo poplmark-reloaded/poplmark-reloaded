@@ -1,0 +1,10 @@
+-R . Rec
+axioms.v
+fintype.v
+stlc.v
+reduction.v
+sn_defs.v
+sn_inductive_2a.v
+sn_inductive_2b.v
+sn_inductive_soundness_1a.v
+sn_inductive_soundness_1b.v

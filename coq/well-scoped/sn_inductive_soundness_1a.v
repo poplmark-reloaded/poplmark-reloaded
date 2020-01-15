@@ -1,11 +1,11 @@
 (** * Different Characterisations Strong Normalisation *)
 
-Require Import base contexts stlc reduction sn_defs.
+Require Import stlc reduction sn_defs Coq.Program.Equality.
 Set Implicit Arguments.
 Unset Strict Implicit.
 
 (** ** Closure Properties of sn *)
-Lemma sn_preimage {G1 G2 A1 A2} (f : tm G1 A1 -> tm G2 A2) (s : tm G1 A1) :
+Lemma sn_preimage {m n} (f : tm m -> tm n) (s : tm m) :
   (forall t u, step t u -> step (f t) (f u)) ->
   sn (f s) -> sn s.
 Proof.
@@ -13,34 +13,34 @@ Proof.
   eapply H0; eauto.
 Qed.
 
-Lemma sn_appL {G A B} (s : tm G (Fun A B)) (t : tm G A) :
+Lemma sn_appL {n} (s : tm n) (t : tm n) :
   sn (app s t) -> sn s.
-Proof. apply (@sn_preimage _ _ _ _ (fun s => app s t)); eauto using @step. Qed.
+Proof. apply (@sn_preimage _ _ (fun s => app s t)); eauto using @step. Qed.
 
-Lemma sn_inst {G1 G2 A} (f : subst G1 G2) (s : tm G1 A) :
-  sn (inst f s) -> sn s.
+Lemma sn_subst_tm {m n} (f : fin m -> tm n) (s : tm m) :
+  sn (subst_tm f s) -> sn s.
 Proof. apply sn_preimage. apply step_inst. Qed.
 
-Lemma closed_lam {g} A B (s : tm (A ::g)  B) :
-  sn s -> sn (lam s).
+Lemma closed_lam {n}  (s : tm (S n)) A:
+  sn s -> sn (lam A s).
 Proof.
   induction 1 as [M H IH]. constructor. intros M' C. inv C. auto.
 Qed.
 
-Lemma closed_appR g A B (M: tm g (Fun A B)) (N: tm g A)  :
+Lemma closed_appR n (M: tm n) (N: tm n)  :
   sn (app M N) -> sn N.
 Proof. eapply sn_preimage. apply step_appR. Qed.
 
 (* Weak Head Reduction *)
-Inductive redsn : forall g A,  tm g A -> tm g A -> Prop :=
- | redsn_beta g A B (M: tm (A :: g) B) (N: tm g A) : sn N -> redsn (app (lam M) N) (inst (N.:ids) M)
- | redsn_app g A B (R R' : tm g (Fun A B)) (M : tm g A) : redsn R R' -> redsn (app R M) (app R' M).
+Inductive redsn : forall n,  tm n -> tm n -> Prop :=
+ | redsn_beta n A (M: tm (S n)) (N: tm n) : sn N -> redsn (app (lam A M) N) (subst_tm (N.:ids) M)
+ | redsn_app n (R R' : tm n) (M : tm n) : redsn R R' -> redsn (app R M) (app R' M).
 
-Lemma fundamental_backwards g A B (M: tm (A::g) B) (N: tm g A):
-   sn N -> sn (inst (N.: ids) M) -> sn (app (lam M) N).
+Lemma fundamental_backwards n (M: tm (S n)) (N: tm n) A:
+   sn N -> sn (subst_tm (N.: ids) M) -> sn (app (lam A M) N).
 Proof.
   intros sn_N sn_M'.
-  assert (H: sn M) by (now apply sn_inst in sn_M').
+  assert (H: sn M) by (now apply sn_subst_tm in sn_M').
   revert M H sn_M'. induction sn_N as [N sn_N IH_N].
   induction 1 as [M sn_M IH_M]. intros H. constructor. intros M' C. inv C.
   - constructor. intros M' H'. inv H. now apply H.
@@ -52,18 +52,18 @@ Proof.
 Qed.
 
 (* Neutral terms *)
-Fixpoint neutral g A (M: tm g A) :=
+Fixpoint neutral n (M: tm n) :=
   match M with
-  | var x => True
+  | var_tm  x => True
   | app  s t => neutral s
   | _ => False
   end.
 
-Lemma neutral_preservation g A (M N: tm g A):
+Lemma neutral_preservation n (M N: tm n):
   neutral  M -> step M N ->  neutral N.
 Proof. intros H. induction 1; simpl in *; intuition. Qed.
 
-Lemma sn_confluence g A (M: tm g A):
+Lemma sn_confluence n (M: tm n):
   forall M' M'', redsn M M' -> step M M'' -> M' = M'' \/ exists M''', redsn M'' M''' /\ mstep M' M'''.
 Proof.
   induction M as [x | T M IHM | M1 IHM1 M2 IHM2]; intros M' M'' D E; inv D; inv E.
@@ -73,7 +73,7 @@ Proof.
     + apply mstep_inst. eauto using mstep_step.
   - right. eexists. split. econstructor. inv H; eauto. apply mstep_beta; eauto using mstep_step.
   - inv D.
-  - destruct (IHM1 _ _ D E) as [IH|(M''&IH1&IH2)].
+  - destruct (IHM _ _ D E) as [IH|(M''&IH1&IH2)].
     + subst. now left.
     + right. eexists. split.
       * econstructor. eassumption.
@@ -83,10 +83,10 @@ Proof.
     + eapply mstep_app. constructor. eauto using mstep_step.
 Qed.
 
-Lemma redsn_backwards g A (M M': tm g A):
+Lemma redsn_backwards n (M M': tm n):
  redsn M M' -> sn M' -> sn M.
 Proof.
- induction 1 as [|g A B M M' N H IH].
+ induction 1 as [|n M M' N H IH].
  - intros D. eapply fundamental_backwards; eauto.
  - intros D. specialize (IH (sn_appL D)).
    assert (sn_N: sn N) by (now apply closed_appR in D).
@@ -102,8 +102,8 @@ Proof.
      * inv D. apply H. now constructor.
 Qed.
 
-Lemma sn_app_neutral g A (N : tm g A) :
-   sn N -> forall B (M: tm g (Fun A B)), neutral M -> sn M -> sn (app M N).
+Lemma sn_app_neutral n (N : tm n) :
+   sn N -> forall (M: tm n), neutral M -> sn M -> sn (app M N).
 Proof.
   induction 1 as [N sn_N IH_N].
   induction 2 as [M sn_M IH_M].

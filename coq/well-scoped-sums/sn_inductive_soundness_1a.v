@@ -1,30 +1,28 @@
 (** * Different Characterisations Strong Normalisation *)
 
-Require Import base contexts stlc reduction sn_defs.
+Require Import stlc reduction sn_defs Coq.Program.Equality.
+Set Implicit Arguments.
+Unset Strict Implicit.
 
 (** ** Closure Properties of sn *)
-Lemma sn_preimage {G1 G2 A1 A2} (f : tm G1 A1 -> tm G2 A2) (s : tm G1 A1) :
+Lemma sn_preimage {m n} (f : tm m -> tm n) (s : tm m) :
   (forall t u, step t u -> step (f t) (f u)) ->
   sn (f s) -> sn s.
 Proof.
   intros H sns. dependent induction sns. apply snI. intros t st.
-  eapply H0; [|now apply H |reflexivity]. now apply H.
+  eapply H0; eauto.
 Qed.
 
-Lemma sn_appL {G A B} (s : tm G (Fun A B)) (t : tm G A) :
+Lemma sn_appL {n} (s : tm n) (t : tm n) :
   sn (app s t) -> sn s.
-Proof.
-  apply (@sn_preimage _ _ _ _ (fun s => app s t)); eauto using @step.
-Qed.
+Proof. apply (@sn_preimage _ _ (fun s => app s t)); eauto using @step. Qed.
 
-Lemma sn_inst {G1 G2 A} (f : subst G1 G2) (s : tm G1 A) :
-  sn (inst f s) -> sn s.
-Proof.
-  apply sn_preimage. apply step_inst.
-Qed.
+Lemma sn_subst_tm {m n} (f : fin m -> tm n) (s : tm m) :
+  sn (subst_tm f s) -> sn s.
+Proof. apply sn_preimage. apply step_inst. Qed.
 
-Lemma closed_lam {g} A B (s : tm (A ::g)  B) :
-  sn (lam s) <-> sn s.
+Lemma closed_lam {n}  (s : tm (S n)) A:
+  sn (lam A s) <-> sn s.
 Proof.
   split.
   - eapply sn_preimage. apply step_abs.
@@ -32,19 +30,19 @@ Proof.
     constructor. intros M' C. inv C. auto.
 Qed.
 
-Lemma closed_appR g A B (M: tm g (Fun A B)) (N: tm g A)  :
+Lemma closed_appR n (M: tm n) (N: tm n)  :
   sn (app M N) -> sn N.
-Proof. eapply sn_preimage, step_appR. Qed.
+Proof. eapply sn_preimage. apply step_appR. Qed.
 
-Lemma closed_inl g A B (M: tm g A)  :
-  sn M -> sn (inl (B := B) M).
+Lemma closed_inl n (M: tm n)  :
+  sn M -> sn (inl  M).
 Proof. induction 1 as [M H IH]. constructor. intros M' C. inv C. auto. Qed.
 
-Lemma closed_inr g A B (M: tm g B)  :
-  sn M -> sn (inr (A := A) M).
+Lemma closed_inr n (M: tm n)  :
+  sn M -> sn (inr M).
 Proof. induction 1 as [M H IH]. constructor. intros M' C. inv C. auto. Qed.
 
-Lemma closed_orelim g A B C (M: tm g (Plus A B)) (N1: tm (A::g) C) N2:
+Lemma closed_orelim n (M: tm n) (N1: tm (S n)) N2:
   sn (orelim M N1 N2) -> sn M /\ sn N1 /\ sn N2.
 Proof.
   intros H. split.
@@ -57,21 +55,22 @@ Proof.
 Qed.
 
 (* Weak Head Reduction *)
-Inductive redsn : forall g A,  tm g A -> tm g A -> Prop :=
- | redsn_beta g A B (M: tm (A :: g) B) (N: tm g A) : sn N -> redsn (app (lam M) N) (inst (N.:ids) M)
- | redsn_app g A B (R R' : tm g (Fun A B)) (M : tm g A) : redsn R R' -> redsn (app R M) (app R' M)
- | redsn_or g A B C (M M' : tm g (Plus A B)) (N1 : tm (A ::g) C) N2: redsn M M' -> redsn (orelim M N1 N2) (orelim M' N1 N2)
- | redsn_caseL G A B C (s: tm G A) t t' (u: tm (B :: G) C) : sn s -> sn t -> sn u -> t' = (inst (s.:ids) t) -> redsn (orelim (inl s) t u) t'
-| redsn_caseR G A B C (s: tm G B) (t: tm (A :: G) C) u u': sn s -> sn t -> sn u -> u' = (inst (s.:ids) u) ->  redsn (orelim (inr s) t u) u'.
+Inductive redsn : forall n,  tm n -> tm n -> Prop :=
+ | redsn_beta n A (M: tm (S n)) (N: tm n) : sn N -> redsn (app (lam A M) N) (subst_tm (N.:ids) M)
+ | redsn_app n (R R' : tm n) (M : tm n) : redsn R R' -> redsn (app R M) (app R' M)
+ | redsn_or n (M M' : tm n) (N1 : tm (S n)) N2: redsn M M' -> redsn (orelim M N1 N2) (orelim M' N1 N2)
+ | redsn_caseL n (s: tm n) t t' (u: tm (S n)) : sn s -> sn t -> sn u -> t' = (t[s..]) -> redsn (orelim (inl s) t u) t'
+| redsn_caseR n (s: tm n) (t: tm (S n)) u u': sn s -> sn t -> sn u -> u' = (u[s..]) ->  redsn (orelim (inr s) t u) u'.
 
-Lemma fundamental_backwards g A B (M: tm (A::g) B) (N: tm g A):
-   sn N -> sn (inst (N.: ids) M) -> sn (app (lam M) N).
+
+Lemma fundamental_backwards n (M: tm (S n)) (N: tm n) A :
+   sn N -> sn (subst_tm (N.: ids) M) -> sn (app (lam A M) N).
 Proof.
   intros sn_N sn_M'.
-  assert (H: sn M) by (now apply sn_inst in sn_M').
+  assert (H: sn M) by (now apply sn_subst_tm in sn_M').
   revert M H sn_M'. induction sn_N as [N sn_N IH_N].
   induction 1 as [M sn_M IH_M]. intros H. constructor. intros M' C. inv C.
-  - assumption.
+  - constructor. intros M' H'. inv H. now apply H.
   - inv C. rename b2 into M'. eapply IH_M. assumption.
     eauto using sn_mstep, mstep_beta, mstep_step.
   - eapply IH_N; eauto.
@@ -79,10 +78,10 @@ Proof.
     + eauto using sn_mstep, mstep_beta, mstep_step.
 Qed.
 
-Lemma fundamental_backwards_orl g A B C (s : tm g A) (t: tm (A::g) C) (u: tm (B::g) C):
-   sn s -> sn u -> sn (inst (s.: ids) t) -> sn (orelim (inl s) t u).
+Lemma fundamental_backwards_orl n (s : tm n) (t: tm (S n)) (u: tm (S n)):
+   sn s -> sn u -> sn (t[s..]) -> sn (orelim (inl s) t u).
 Proof.
-  intros sn_s sn_u H. assert (H': sn t) by (now apply sn_inst in H).
+  intros sn_s sn_u H. assert (H': sn t) by (now apply sn_subst_tm in H).
   revert t H' u sn_u H.
   induction sn_s as [s sn_s IHs].
   induction 1 as [u sn_u IHu].
@@ -94,10 +93,10 @@ Proof.
   - assumption.
 Qed.
 
-Lemma fundamental_backwards_orr g A B C (s : tm g B) (t: tm (A::g) C) (u: tm (B::g) C):
-   sn s -> sn t -> sn (inst (s.: ids) u) -> sn (orelim (inr s) t u).
+Lemma fundamental_backwards_orr n (s : tm n) (t: tm (S n)) (u: tm (S n)):
+   sn s -> sn t -> sn (u[s..]) -> sn (orelim (inr s) t u).
 Proof.
-  intros sn_s sn_t H. assert (H': sn u) by (now apply sn_inst in H).
+  intros sn_s sn_t H. assert (H': sn u) by (now apply sn_subst_tm in H).
   revert u H' t sn_t H.
   induction sn_s as [s sn_s IHs].
   induction 1 as [t sn_t IHt].
@@ -110,20 +109,20 @@ Proof.
 Qed.
 
 (* Neutral terms *)
-Fixpoint neutral g A (M: tm g A) :=
+Fixpoint neutral n (M: tm n) :=
   match M with
-  | var x => True
+  | var_tm x => True
   | app  s t => neutral s
   | orelim s t u => neutral s
   | _ => False
   end.
 
-Lemma neutral_preservation g A (M N: tm g A):
+Lemma neutral_preservation n (M N: tm n):
   neutral  M -> step M N ->  neutral N.
 Proof. intros H. induction 1; simpl in *; intuition. Qed.
 
-Lemma sn_app_neutral g A (N : tm g A) :
-   sn N -> forall B (M: tm g (Fun A B)), neutral M -> sn M -> sn (app M N).
+Lemma sn_app_neutral n (N : tm n) :
+   sn N -> forall (M: tm n), neutral M -> sn M -> sn (app M N).
 Proof.
   induction 1 as [N sn_N IH_N].
   induction 2 as [M sn_M IH_M].
@@ -133,8 +132,8 @@ Proof.
   - eauto using snI.
 Qed.
 
-Lemma sn_case_neutral g A B C (N1 : tm (A ::g) C):
-  sn N1 -> forall N2,  sn N2 -> forall (M: tm g (Plus A B)), sn M -> neutral M ->  sn (orelim M N1 N2).
+Lemma sn_case_neutral n (N1 : tm (S n)):
+  sn N1 -> forall N2,  sn N2 -> forall (M: tm n), sn M -> neutral M ->  sn (orelim M N1 N2).
 Proof.
   induction 1 as [N1 snN1 IHN1].
   induction 1 as [N2 snN2 IHN2].
@@ -147,10 +146,10 @@ Proof.
   * contradiction.
 Qed.
 
-Lemma sn_confluence g A (M: tm g A):
+Lemma sn_confluence n (M: tm n):
   forall M' M'', redsn M M' -> step M M'' -> M' = M'' \/ exists M''', redsn M'' M''' /\ mstep M' M'''.
 Proof.
-  induction M as [g A x | g A B M IHM N IHN |g A B M IHM| g A B M IHM | g A B M IHM | g A B C M IHM N1 IHN1 N2 IHN2]; intros M' M'' D E; inv D; inv E.
+  induction M as [n x | n M IHM N IHN |n M IHM| n M IHM | n M IHM | n M IHM N1 IHN1 N2 IHN2]; intros M' M'' D E; inv D; inv E.
   - now left.
   - inv E. right. eexists. split.
     + now constructor.
@@ -177,32 +176,32 @@ Proof.
     * eauto using mstep_orelim, mstep_step.
   - inv D.
   - inv D.
-  - inv E. right. exists (inst (s0 .: ids) N1). split.
+  - inv E. right. exists (N1 [s2..]). split.
     + constructor; auto. inv H. now apply H.
     + apply mstep_beta; eauto using mstep_step.
-  - right. exists (inst (s .: ids) t2). split.
+  - right. exists (t2[s..]). split.
     + constructor; eauto. inv H0. now apply H0.
     + apply mstep_beta; eauto using mstep_step.
-  - right.  exists (inst (s .: ids) N1). split.
+  - right.  exists (N1[s..]). split.
     + constructor; auto. inv H1. now apply H1.
     + constructor.
   - now left.
-  - inv E. right. exists (inst (s0 .: ids) N2). split.
+  - inv E. right. exists (N2 [s2..]).  split.
     + constructor; auto. inv H. now apply H.
     + apply mstep_beta; eauto using mstep_step.
-  - right. exists (inst (s .: ids) N2). split.
+  - right. exists (N2[s..]).  split.
     + constructor; auto. inv H0. now apply H0.
     + constructor.
-  - right. exists (inst (s .: ids) u2). split.
+  - right. exists (u2[s..]). split.
     + constructor; auto. inv H1. now apply H1.
     + apply mstep_beta; eauto using mstep_step.
   - now left.
 Qed.
 
-Lemma redsn_backwards g A (M M': tm g A):
+Lemma redsn_backwards n (M M': tm n):
  redsn M M' -> sn M' -> sn M.
 Proof.
- induction 1 as [|g A B M M' N H IH|g A B C M M' N1 N2 H IH|g A B C s t t' u h1 h2 h3|g A B C s t u u' h1 h2 h3].
+ induction 1 as [|n M M' N H IH|n M M' N1 N2 H IH|n s t t' u h1 h2 h3|n s t u u' h1 h2 h3].
  - intros D. eapply fundamental_backwards; eauto.
  - intros D. specialize (IH (sn_appL D)).
    assert (sn_N: sn N) by (now apply closed_appR in D).
