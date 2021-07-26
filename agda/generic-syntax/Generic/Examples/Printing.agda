@@ -1,19 +1,19 @@
 module Generic.Examples.Printing where
 
 open import Size
-open import Coinduction hiding (∞)
+open import Codata.Musical.Notation hiding (∞)
 open import Data.Unit
 open import Data.Bool
 open import Data.Product
 open import Data.Nat.Base
 open import Data.Nat.Show as Nat
-open import Data.List.Base as L hiding ([_] ; _++_ ; lookup)
+open import Data.List.Base as L using (List; []; _∷_) -- hiding ([_] ; _++_ ; lookup)
 open import Data.Char
 open import Data.String using (String ; _++_ ; fromList ; toList)
-open import Data.Stream as Str hiding (_++_ ; lookup)
+open import Codata.Musical.Stream as Str hiding (_++_ ; lookup)
 open import Category.Monad
 open import Category.Monad.State
-open import Function
+open import Function.Base
 
 module ST = RawMonadState (StateMonadState (Stream String))
 open ST

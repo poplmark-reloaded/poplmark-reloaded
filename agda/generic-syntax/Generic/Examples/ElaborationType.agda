@@ -1,7 +1,7 @@
 module Generic.Examples.ElaborationType where
 
 open import Size
-open import Function
+open import Function.Base
 open import Data.Bool
 open import Data.Product as P hiding (,_)
 open import Data.List hiding ([_])
@@ -79,7 +79,7 @@ Sem.th^𝓥  Typecheck = λ v ρ γ → let (σ , x) = v (rewind _ γ ρ) in σ 
   got z     (σ ∷ _) = z
   got (s k) (_ ∷ γ) = s (got k γ)
 
-  unwind : (Γ : List Phase) {Δ : List Phase} {σ : Type} (γ : All (const Type) Δ) (ρ : Thinning Γ Δ) → 
+  unwind : (Γ : List Phase) {Δ : List Phase} {σ : Type} (γ : All (const Type) Δ) (ρ : Thinning Γ Δ) →
            Var σ (erase^All (rewind Γ γ ρ)) → Var σ (erase^All γ)
   unwind [] γ ρ ()
   unwind (σ ∷ Γ) γ ρ z     = got (lookup ρ z) γ

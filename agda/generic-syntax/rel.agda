@@ -1,6 +1,6 @@
 module rel where
 
-open import Size
+open import Size using (∞)
 open import Data.Sum
 open import Data.List.Base hiding (lookup ; [_])
 
@@ -66,4 +66,3 @@ module _ {I : Set} {d : Desc I} where
 
  VarTm^R : Rel Var (Tm d ∞)
  rel VarTm^R v t = `var v ≡ t
-

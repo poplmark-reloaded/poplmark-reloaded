@@ -2,7 +2,7 @@ module varlike where
 
 open import Data.List.Base hiding (lookup ; [_])
 open import Data.Sum
-open import Function
+open import Function.Base
 open import Relation.Binary.PropositionalEquality hiding ([_])
 
 open import indexed
@@ -106,4 +106,3 @@ module _ {I : Set} {𝓥₁ 𝓥₂ 𝓒₁ 𝓒₂ : I ─Scoped} (𝓡^𝓥  :
  Kripke^R : (Δ : List I) (τ : I) → [ Kripke 𝓥₁ 𝓒₁ Δ τ ⟶ Kripke 𝓥₂ 𝓒₂ Δ τ ⟶ κ Set ]
  Kripke^R []         σ k₁ k₂ = rel 𝓡^𝓒 k₁ k₂
  Kripke^R Δ@(_ ∷ _)  σ k₁ k₂ = {Θ : List I} {ρ₁ : (Δ ─Env) 𝓥₁ Θ} {ρ₂ : (Δ ─Env) 𝓥₂ Θ} → ∀ th → ∀[ 𝓡^𝓥 ] ρ₁ ρ₂ → rel 𝓡^𝓒 (k₁ th ρ₁) (k₂ th ρ₂)
-

@@ -13,8 +13,9 @@ open import Generic.Semantics
 open import Generic.Zip
 open import Generic.Simulation
 
-open import Function
+open import Function.Base
 open import Relation.Binary.PropositionalEquality as PEq
+open import Relation.Binary.PropositionalEquality.WithK
 open ≡-Reasoning
 
 module _ {I : Set} {d : Desc I} where
@@ -35,9 +36,9 @@ module _ {I : Set} {d : Desc I} where
  ≅⇒≡ (`var eq) = cong `var eq
  ≅⇒≡ (`con eq) = cong `con (⟨ d ⟩≅⇒≡ eq)
 
- ⟨ `σ A d   ⟩≅⇒≡ (refl , eq) = cong ,_ (⟨ d _ ⟩≅⇒≡ eq)
+ ⟨ `σ A d   ⟩≅⇒≡ (refl , eq) = cong (_ ,_) (⟨ d _ ⟩≅⇒≡ eq)
  ⟨ `X Δ j d ⟩≅⇒≡ (≅-pr , eq) = cong₂ _,_ (≅⇒≡ ≅-pr) (⟨ d ⟩≅⇒≡ eq)
- ⟨ `∎ i     ⟩≅⇒≡ eq          = proof-irrelevance _ _
+ ⟨ `∎ i     ⟩≅⇒≡ eq          = ≡-irrelevant _ _
 
 module RenId {I : Set} {d : Desc I} where
 

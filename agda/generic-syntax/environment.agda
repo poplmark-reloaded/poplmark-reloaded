@@ -1,9 +1,9 @@
 module environment {I : Set} where
 
 open import Data.Nat.Base as ℕ
-open import Data.List.Base hiding (lookup ; [_])
+open import Data.List.Base using (List; []; _∷_; _++_)
 open import Data.Sum as S
-open import Function
+open import Function.Base using (id; flip; _$_)
 open import Relation.Binary.PropositionalEquality as PEq hiding ([_])
 
 open import indexed
@@ -131,4 +131,3 @@ module _ {𝓥 : I ─Scoped} {A : Set → Set} (app : RawApplicative A) where
    go : ∀ Γ {Δ} → (Γ ─Env) (λ i Γ → A (𝓥 i Γ)) Δ → A ((Γ ─Env) 𝓥 Δ)
    go []       ρ = pure ε
    go (σ ∷ Γ)  ρ = flip _∙_ A.<$> lookup ρ z ⊛ go Γ (select extend ρ)
-

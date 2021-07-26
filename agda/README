@@ -2,8 +2,13 @@ Agda-based solution to the POPLMark2 reloaded challenge.
 
 To compile this solution you'll need:
 
-* Agda version 2.5.3
-* Agda's standard library version 0.15
+* latest:
+  - Agda version 2.6.2
+  - Agda's standard library version 0.17
+
+* tag agda-2.5.3:
+  - Agda version 2.5.3
+  - Agda's standard library version 0.15
 
 To check this solution you can:
 

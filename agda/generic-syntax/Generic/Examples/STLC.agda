@@ -8,7 +8,7 @@ open import Agda.Builtin.List
 open import Generic.Syntax
 open import var
 open import motivation using (Type ; α ; _⇒_)
-open import Function
+open import Function.Base
 
 data `STLC : Set where
   App Lam : Type → Type → `STLC

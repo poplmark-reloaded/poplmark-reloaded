@@ -5,7 +5,7 @@ open import Data.Unit
 open import Data.Bool
 open import Data.Product
 open import Data.List.Base hiding ([_])
-open import Function
+open import Function.Base
 open import Relation.Binary.PropositionalEquality hiding ([_])
 
 open import indexed
@@ -49,7 +49,8 @@ data Redex {Γ : List Kind} : SF Term Γ → Set where
   [Lam]    : {b : SF Term (Type ∷ Γ)} → Redex b → Redex (Lam b)
 
 open import Category.Monad
-open import Data.Maybe
+open import Data.Maybe.Base
+open import Data.Maybe.Categorical
 import Level
 open RawMonadPlus (monadPlus {Level.zero})
 
@@ -71,8 +72,9 @@ fire ([lam] b)     = lam (fire b)
 fire ([App] f t)   = App (fire f) t
 fire ([Lam] b)     = Lam (fire b)
 
-open import Coinduction
-open import Data.Colist
+open import Codata.Musical.Notation
+open import Codata.Musical.Colist
+open import Codata.Musical.Colist.Bisimilarity
 
 eval : (Γ : List Kind) (t : SF Term Γ) → Colist (SF Term Γ)
 eval Γ t with redex t

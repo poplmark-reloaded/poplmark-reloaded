@@ -5,7 +5,7 @@ open import Data.Bool
 open import Data.Product
 open import Data.List.All
 open import Data.List.Base hiding ([_])
-open import Function
+open import Function.Base
 open import Relation.Binary.PropositionalEquality hiding ([_])
 
 open import indexed

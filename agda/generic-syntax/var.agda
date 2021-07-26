@@ -8,10 +8,10 @@
 module var where
 
 open import indexed
-open import Data.Sum hiding (map)
-open import Data.List.Base hiding ([_])
-open import Data.List.All using (All ; _∷_)
-open import Function
+open import Data.Sum                     using (_⊎_; inj₁; inj₂)
+open import Data.List.Base               using (List; []; _∷_; map; _++_)
+open import Data.List.Relation.Unary.All using (All; _∷_)
+open import Function.Base                using (_∘_; _∋_)
 open import Agda.Builtin.Equality
 
 

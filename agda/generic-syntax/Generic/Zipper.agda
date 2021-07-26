@@ -7,7 +7,7 @@ open import Data.Bool
 open import Data.Sum
 open import Data.List.Base as List
 open import Data.List.Properties
-open import Function
+open import Function.Base
 open import Relation.Binary.PropositionalEquality hiding ([_])
 
 open import var

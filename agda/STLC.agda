@@ -6,9 +6,9 @@ open import Size
 open import Data.Sum as Sum
 open import Data.Product as Prod
 open import Agda.Builtin.List
-open import Data.Product hiding (,_)
-open import Data.Star as S using (Star)
-open import Function hiding (_∋_)
+open import Data.Product
+open import  Relation.Binary.Construct.Closure.ReflexiveTransitive as S using (Star)
+open import Function.Base hiding (_∋_)
 open import Relation.Binary.PropositionalEquality hiding ([_]); open ≡-Reasoning
 
 ---------------------------------------------------------------------------------
@@ -320,6 +320,7 @@ cut⁻¹‿sn^↝ (app c^sn t^sn)           ¬λ ([∙]₂ r t) with cut⁻¹‿
 ... | inj₂ (c′ , eq , c′^sn , r′) =
   inj₂ (app c′ t , cong (_`∙ t) eq , app c′^sn t^sn , λ u → [∙]₂ (r′ u) t)
 
+{-# TERMINATING #-}
 β⁻¹^Closed-sn : ∀ {Γ α σ τ} c b u → (σ ∷ Γ) ⊢sn α ∋ b → Γ ⊢sn σ ∋ u →
                 Γ ⊢sn τ ∋ cut (b [ u /0]) c → Γ ∣ α ⊢sn τ ∋ c →
                 Closed (Γ ⊢ τ ∋_↝_) (Γ ⊢sn τ ∋_) (cut (`λ b `∙ u) c)
@@ -387,13 +388,12 @@ data _∣_⊢SN_∋_<_ Γ α : ∀ σ → Γ ∣ α ⊢ σ → Size → Set wher
 _∣_⊢SN_∋_ = _∣_⊢SN_∋_< _
 
 -- Inversion Lemma: SNe to SN Evaluation Context
-cut⁻¹^SNe : ∀ {Γ τ t i} → Γ ⊢SNe τ ∋ t < i → ∃ λ ctx → let (σ , c) = ctx in
+cut⁻¹^SNe : ∀ {Γ τ t i} → Γ ⊢SNe τ ∋ t < i → ∃ λ (σ : Type) → ∃ λ c →
             ∃ λ v → t ≡ cut (`var v) c × Γ ∣ σ ⊢SN τ ∋ c < i
-cut⁻¹^SNe (var v)          = _ , v , refl , <>
+cut⁻¹^SNe (var v)          = _ , _ , v , refl , <>
 cut⁻¹^SNe (app f^SNe t^SN) =
-  let (_ , v , eq , c^SN) = cut⁻¹^SNe f^SNe
-  in _ , v , cong (_`∙ _) eq , app c^SN t^SN
-
+  let (_ , _ , v , eq , c^SN) = cut⁻¹^SNe f^SNe
+  in _ , _ , v , cong (_`∙ _) eq , app c^SN t^SN
 
 -- Stability of SN under Thinning
 mutual
@@ -478,7 +478,7 @@ _⊢_∋_↝sn_ = _⊢_∋_↝sn_< _
 mutual
 
  sound^SN : ∀ {Γ σ t i} → Γ ⊢SN σ ∋ t < i → Γ ⊢sn σ ∋ t
- sound^SN (neu t^SNe)  = let (_ , v , eq , c^SN) = cut⁻¹^SNe t^SNe in
+ sound^SN (neu t^SNe)  = let (_ , _ , v , eq , c^SN) = cut⁻¹^SNe t^SNe in
                          subst (_ ⊢sn _ ∋_) (sym eq) (cut^sn _ (sound^∣SN c^SN))
  sound^SN (lam b^SN)   = `λ^sn (sound^SN b^SN)
  sound^SN (red r t^SN) = ↝sn⁻¹^sn <> (sound^↝SN r) (sound^SN t^SN)
@@ -644,3 +644,5 @@ t ^SN = cast (quote^𝓡 _ (eval dummy t))
 
 _^sn : ∀ {Γ σ} t → Γ ⊢sn σ ∋ t
 t ^sn = sound^SN (t ^SN)
+
+-- -}

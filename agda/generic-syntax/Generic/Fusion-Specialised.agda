@@ -12,7 +12,7 @@ open import Generic.Fusion
 open import Generic.Identity
 
 open import Size
-open import Function
+open import Function.Base
 open import Data.Sum
 open import Data.Product hiding (,_)
 open import Data.List.Base
@@ -88,4 +88,3 @@ module _ {I} (d : Desc I) {𝓥 𝓒} (S : Sem d 𝓥 𝓒) where
                         (∀ x → f x ≡ g x) → f ≡ g
               ifun-ext : ∀ {ℓ ℓ′} {A : Set ℓ} {B : A → Set ℓ′} {f g : {a : A} → B a} →
                          (∀ x → f {x} ≡ g {x}) → (λ {x} → f {x}) ≡ g
-

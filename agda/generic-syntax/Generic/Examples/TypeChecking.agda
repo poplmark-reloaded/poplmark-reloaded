@@ -1,7 +1,7 @@
 module Generic.Examples.TypeChecking where
 
 open import Size
-open import Function
+open import Function.Base
 open import Data.Unit
 open import Data.Bool
 open import Data.Product as P hiding (,_)

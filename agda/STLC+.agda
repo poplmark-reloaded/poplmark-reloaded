@@ -6,9 +6,9 @@ open import Size
 open import Data.Sum as Sum
 open import Data.Product as Prod
 open import Agda.Builtin.List
-open import Data.Product hiding (,_)
-open import Data.Star as S using (Star)
-open import Function hiding (_∋_)
+open import Data.Product
+open import Relation.Binary.Construct.Closure.ReflexiveTransitive as S using (Star)
+open import Function.Base hiding (_∋_)
 open import Relation.Binary.PropositionalEquality hiding ([_]); open ≡-Reasoning
 
 ---------------------------------------------------------------------------------
@@ -473,6 +473,7 @@ cut⁻¹‿sn^↝ (cas c^sn@(cas _ _ _) l^sn r^sn) ¬λι ([c]₂ t red r) =
 cut⁻¹‿sn^↝ (cas c^sn@(cas _ _ _) l^sn r^sn) ¬λι ([c]₃ t l red) =
   inj₂ (cas _ l _ , refl , cas c^sn l^sn (Closed-sn r^sn red) , λ u → [c]₃ _ l red)
 
+{-# TERMINATING #-}
 β⁻¹^Closed-sn : ∀ {Γ α σ τ} c b u → (σ ∷ Γ) ⊢sn α ∋ b → Γ ⊢sn σ ∋ u →
                 Γ ⊢sn τ ∋ cut (b [ u /0]) c → Γ ∣ α ⊢sn τ ∋ c →
                 Closed (Γ ⊢ τ ∋_↝_) (Γ ⊢sn τ ∋_) (cut (`λ b `∙ u) c)
@@ -492,6 +493,7 @@ cut⁻¹‿sn^↝ (cas c^sn@(cas _ _ _) l^sn r^sn) ¬λι ([c]₃ t l red) =
          Γ ⊢sn τ ∋ cut (`λ b `∙ u) c
 β⁻¹^sn b^sn u^sn c[b[u]]^sn c^sn = sn (β⁻¹^Closed-sn _ _ _ b^sn u^sn c[b[u]]^sn c^sn)
 
+{-# TERMINATING #-}
 ι₁⁻¹^Closed-sn : ∀ {Γ α σ τ ν} c t l r → Γ ⊢sn σ ∋ t → (σ ∷ Γ) ⊢sn α ∋ l → (τ ∷ Γ) ⊢sn α ∋ r →
   Γ ⊢sn ν ∋ cut (l [ t /0]) c → Γ ∣ α ⊢sn ν ∋ c →
   Closed (Γ ⊢ ν ∋_↝_) (Γ ⊢sn ν ∋_) (cut (`case (`i₁ t) l r) c)
@@ -513,6 +515,7 @@ cut⁻¹‿sn^↝ (cas c^sn@(cas _ _ _) l^sn r^sn) ¬λι ([c]₃ t l red) =
 ι₁⁻¹^sn c t l r t^sn l^sn r^sn c[l[t]]^sn c^sn =
   sn (ι₁⁻¹^Closed-sn c t l r t^sn l^sn r^sn c[l[t]]^sn c^sn)
 
+{-# TERMINATING #-}
 ι₂⁻¹^Closed-sn : ∀ {Γ α σ τ ν} c t l r → Γ ⊢sn τ ∋ t → (σ ∷ Γ) ⊢sn α ∋ l → (τ ∷ Γ) ⊢sn α ∋ r →
   Γ ⊢sn ν ∋ cut (r [ t /0]) c → Γ ∣ α ⊢sn ν ∋ c →
   Closed (Γ ⊢ ν ∋_↝_) (Γ ⊢sn ν ∋_) (cut (`case (`i₂ t) l r) c)
@@ -599,15 +602,15 @@ _∣_⊢SN_∋_ = _∣_⊢SN_∋_< _
 ∘C^SN (cas c^SN l^SN r^SN) c′^SN = cas (∘C^SN c^SN c′^SN) l^SN r^SN
 
 -- Inversion Lemma: SNe to SN Evaluation Context
-cut⁻¹^SNe : ∀ {Γ τ t i} → Γ ⊢SNe τ ∋ t < i → ∃ λ ctx → let (σ , c) = ctx in
+cut⁻¹^SNe : ∀ {Γ τ t i} → Γ ⊢SNe τ ∋ t < i → ∃ λ σ  → ∃ λ c →
             ∃ λ v → t ≡ cut (`var v) c × Γ ∣ σ ⊢SN τ ∋ c < i
-cut⁻¹^SNe (var v)          = _ , v , refl , <>
+cut⁻¹^SNe (var v)          = _ , _ , v , refl , <>
 cut⁻¹^SNe (app f^SNe t^SN) =
-  let (_ , v , eq , c^SN) = cut⁻¹^SNe f^SNe
-  in _ , v , cong (_`∙ _) eq , app c^SN t^SN
+  let (_ , _ , v , eq , c^SN) = cut⁻¹^SNe f^SNe
+  in _ , _ , v , cong (_`∙ _) eq , app c^SN t^SN
 cut⁻¹^SNe (cas t^SNe l^SN r^SN) =
-  let (_ , v , eq , c^SN) = cut⁻¹^SNe t^SNe
-  in _ , v , cong (λ t → `case t _ _) eq , cas c^SN l^SN r^SN
+  let (_ , _ , v , eq , c^SN) = cut⁻¹^SNe t^SNe
+  in _ , _ , v , cong (λ t → `case t _ _) eq , cas c^SN l^SN r^SN
 
 -- Stability of SN under Thinning
 mutual
@@ -737,7 +740,7 @@ _⊢_∋_↝sn_ = _⊢_∋_↝sn_< _
 mutual
 
  sound^SN : ∀ {Γ σ t i} → Γ ⊢SN σ ∋ t < i → Γ ⊢sn σ ∋ t
- sound^SN (neu t^SNe)  = let (_ , v , eq , c^SN) = cut⁻¹^SNe t^SNe in
+ sound^SN (neu t^SNe)  = let (_ , _ , v , eq , c^SN) = cut⁻¹^SNe t^SNe in
                          subst (_ ⊢sn _ ∋_) (sym eq) (cut^sn _ (sound^∣SN c^SN))
  sound^SN (lam b^SN)   = `λ^sn (sound^SN b^SN)
  sound^SN (inl t^SN)   = `i₁^sn (sound^SN t^SN)

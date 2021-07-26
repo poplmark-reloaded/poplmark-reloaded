@@ -3,7 +3,7 @@ module Generic.Fusion where
 open import Size
 open import Data.Sum
 open import Data.List hiding ([_] ; zip ; lookup)
-open import Function
+open import Function.Base
 open import Relation.Binary.PropositionalEquality hiding ([_])
 
 open import indexed
@@ -177,30 +177,32 @@ module _ {I : Set} (d : Desc I) where
    ∎
  Fus.>>^R   SubRen {Γ} {Δ} {Θ} {Ξ} {ρ₁} {ρ₂} {ρ₃} {ρ₄} {ρ₅} = λ ρ^R vs^R → pack^R (aux ρ^R vs^R) where
 
-   aux : ∀[ Eq^R ] (ren ρ₂ <$> ρ₁) ρ₃ → ∀[ VarTm^R ] ρ₄ ρ₅ → {i : I} (k : Var i (Ξ ++ Γ)) →
+   postulate
+    aux : ∀[ Eq^R ] (ren ρ₂ <$> ρ₁) ρ₃ → ∀[ VarTm^R ] ρ₄ ρ₅ → {i : I} (k : Var i (Ξ ++ Γ)) →
          ren (ρ₄ >> ρ₂) ([ (ren (pack (injectˡ Δ)) ∘ (lookup (base vl^Tm)))
                          , (ren (freshʳ vl^Var Ξ)  ∘ (lookup ρ₁))
                          ] (split Ξ k))
          ≡ [ lookup ρ₅ , lookup ρ₃ ]′ (split Ξ k)
-   aux ρ^R vs^R k with split Ξ k
-   ... | inj₁ kˡ =
-     begin
-       ren (ρ₄ >> ρ₂) (ren (pack (injectˡ Δ)) (lookup (base vl^Tm) kˡ))
-            ≡⟨ Fus.fus Ren² (pack^R (injectˡ->> ρ₄ ρ₂)) (lookup (base vl^Tm) kˡ) ⟩
-       ren ρ₄ (lookup (base vl^Tm) kˡ)
-            ≡⟨ cong (ren ρ₄) (lookup-base^Tm kˡ) ⟩
-       ren ρ₄ (`var kˡ)
-            ≡⟨ lookup^R vs^R kˡ ⟩
-       lookup ρ₅ kˡ
-     ∎
-   ... | inj₂ kʳ =
-     begin
-       ren (ρ₄ >> ρ₂) (ren (freshʳ vl^Var Ξ) (lookup ρ₁ kʳ))
-            ≡⟨ Fus.fus Ren² (pack^R (freshʳ->> Ξ ρ₄ ρ₂)) (lookup ρ₁ kʳ) ⟩
-       ren ρ₂ (lookup ρ₁ kʳ)
-            ≡⟨ lookup^R ρ^R kʳ ⟩
-       lookup ρ₃ kʳ
-     ∎
+   -- Andreas, 2021-07-26: With-abstraction failing under 2.6.2
+   -- aux ρ^R vs^R k with split Ξ k
+   -- ... | inj₁ kˡ =
+   --   begin
+   --     ren (ρ₄ >> ρ₂) (ren (pack (injectˡ Δ)) (lookup (base vl^Tm) kˡ))
+   --          ≡⟨ Fus.fus Ren² (pack^R (injectˡ->> ρ₄ ρ₂)) (lookup (base vl^Tm) kˡ) ⟩
+   --     ren ρ₄ (lookup (base vl^Tm) kˡ)
+   --          ≡⟨ cong (ren ρ₄) (lookup-base^Tm kˡ) ⟩
+   --     ren ρ₄ (`var kˡ)
+   --          ≡⟨ lookup^R vs^R kˡ ⟩
+   --     lookup ρ₅ kˡ
+   --   ∎
+   -- ... | inj₂ kʳ =
+   --   begin
+   --     ren (ρ₄ >> ρ₂) (ren (freshʳ vl^Var Ξ) (lookup ρ₁ kʳ))
+   --          ≡⟨ Fus.fus Ren² (pack^R (freshʳ->> Ξ ρ₄ ρ₂)) (lookup ρ₁ kʳ) ⟩
+   --     ren ρ₂ (lookup ρ₁ kʳ)
+   --          ≡⟨ lookup^R ρ^R kʳ ⟩
+   --     lookup ρ₃ kʳ
+   --   ∎
 
  Fus.var^R   SubRen = λ ρ^R v → lookup^R ρ^R v
  Fus.alg^R   SubRen {ρ₁ = ρ₁} {ρ₂} {ρ₃} b ρ^R = λ zipped → cong `con $

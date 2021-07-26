@@ -3,8 +3,8 @@ module Generic.Semantics where
 open import Size
 open import Data.Bool
 open import Data.List.Base as L hiding (lookup ; [_])
-open import Data.Product as P hiding (,_)
-open import Function
+open import Data.Product as P
+open import Function.Base
 open import Relation.Binary.PropositionalEquality hiding ([_])
 open ≡-Reasoning
 

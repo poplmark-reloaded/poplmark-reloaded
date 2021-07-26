@@ -2,7 +2,7 @@ module Generic.Simulation where
 
 open import Size
 open import Data.List hiding ([_] ; lookup ; zip)
-open import Function
+open import Function.Base
 open import Relation.Binary.PropositionalEquality hiding ([_])
 
 open import indexed

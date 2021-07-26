@@ -6,7 +6,7 @@ open import environment as E hiding (_>>_ ; extend)
 
 open import Data.Nat.Base
 open import Data.List.Base hiding ([_] ; _++_)
-open import Function
+open import Function.Base
 
 infixr 3 _⇒_
 

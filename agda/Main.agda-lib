@@ -1,0 +1,8 @@
+name: POPLmark-reloaded
+depend: standard-library
+include:
+  .
+  generic-syntax
+flags:
+  --sized-types
+  --guardedness

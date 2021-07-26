@@ -2,10 +2,10 @@ module Generic.Syntax where
 
 open import Size
 open import Data.Bool
-open import Data.List.All
+open import Data.List.Relation.Unary.All
 open import Data.List.Base as L hiding ([_])
-open import Data.Product as P hiding (,_)
-open import Function hiding (case_of_)
+open import Data.Product as P
+open import Function.Base using (id; _∘_; _$_; _∋_)
 open import Relation.Binary.PropositionalEquality hiding ([_])
 
 open import var

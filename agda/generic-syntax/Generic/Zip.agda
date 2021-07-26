@@ -3,7 +3,7 @@ module Generic.Zip where
 open import Size
 open import Data.Unit
 open import Data.List hiding ([_] ; zip)
-open import Data.Product hiding (zip ; ,_)
+open import Data.Product using (Σ-syntax; _×_; _,_)
 open import Relation.Binary.PropositionalEquality hiding ([_])
 
 open import indexed
@@ -73,4 +73,3 @@ module _ {I : Set} {𝓥₁ 𝓥₂ 𝓒 : I → List I → Set} (𝓡^𝓥  : R
  zip^reify eq (`∎ i′)      zp               = uip _ _ where
    uip : ∀ {A : Set} {a b : A} (p q : a ≡ b) → p ≡ q
    uip refl refl = refl
-

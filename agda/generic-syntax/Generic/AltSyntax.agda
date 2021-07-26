@@ -7,7 +7,7 @@ open import Data.List.All
 open import Data.List.All.Properties
 open import Data.List.Base as L hiding ([_])
 open import Data.Product as P hiding (,_)
-open import Function hiding (case_of_)
+open import Function.Base hiding (case_of_)
 open import Function.Equality
 open import Function.Inverse
 open import Relation.Binary.PropositionalEquality hiding ([_])
@@ -73,4 +73,3 @@ module ScopeCheck {I : Set} {d : Desc I} (I-dec : (i j : I) → Dec (i ≡ j)) w
 
  scopeCheckBody Γ scp Δ σ (nms , b) =
    scopeCheck σ (Δ L.++ Γ) (Inverse.to ++↔ ⟨$⟩ (nms , scp)) b
-

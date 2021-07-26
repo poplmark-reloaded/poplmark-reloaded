@@ -4,7 +4,7 @@ open import Size
 open import Data.Bool
 open import Data.Product
 open import Data.List.Base as L hiding ([_])
-open import Function
+open import Function.Base
 open import Relation.Binary.PropositionalEquality hiding ([_])
 
 

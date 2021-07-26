@@ -7,7 +7,7 @@ open import Data.Bool
 open import Data.Nat using (ℕ ; suc)
 open import Data.Unit
 open import Data.Product as Prod
-open import Function
+open import Function.Base
 open import Relation.Binary.PropositionalEquality hiding ([_])
 
 
